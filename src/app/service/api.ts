@@ -39,15 +39,8 @@ export const serverApi = Api.injectEndpoints({
                 method: 'GET',
             })
         }),
-        updateGame: builder.mutation<GameData, {id: string, game: Game}>({
-            query: ({id, game}) => ({
-                url: `games/${id}`,
-                method: 'PUT',
-                body: game,
-            })
-        })
     })
 })
 
-export const {useAddGameMutation, useDeleteGamesMutation, useGetGameQuery, useGetAllGamesQuery, useUpdateGameMutation} = serverApi
-export const {endpoints:{getAllGames, deleteGames, addGame, getGame, updateGame}} = serverApi
+export const {useAddGameMutation, useDeleteGamesMutation, useGetGameQuery, useGetAllGamesQuery} = serverApi
+export const {endpoints:{getAllGames, deleteGames, addGame, getGame}} = serverApi

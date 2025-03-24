@@ -1,6 +1,6 @@
 type Props = {
   btnText: string;
-  disabled: boolean;
+  disabled?: boolean;
   onClick?: (e:React.FormEvent) => Promise<void>;
 };
 

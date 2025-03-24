@@ -1,28 +1,39 @@
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "../components/BackButton";
-import { useGetGameQuery, useUpdateGameMutation } from "../app/service/api";
+import { useGetGameQuery } from "../app/service/api";
 import { Input } from "../components/Input";
 import { useState } from "react";
 import { Loader } from "../static/Loader";
 import { ErrorBlock } from "../components/ErrorBlock";
 import { Button } from "../components/Button";
+import type { GameData } from "../types/game.type";
 
 export const EditPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: game, isLoading, isError } = useGetGameQuery(id!);
-  const [updateGame, { isLoading: isUpdating }] = useUpdateGameMutation();
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    title: game?.title || "",
-    genre: game?.genre || "",
-    platform: game?.platform || "",
-    rating: game?.rating || 0,
-    cover: game?.cover || "",
-    description: game?.description || "",
-  });
-  console.log(Number(formData.rating));
-
+  const mergeGame = (game : GameData | undefined) : GameData | undefined =>{
+      const localGame = localStorage.getItem(game!.id.toString());
+      if(localGame){
+        const mergedGame = {
+          ...game,
+          ...JSON.parse(localGame),
+          id: id,
+        };
+        return mergedGame;
+      } else{
+        return game
+      }
+    }
+    const [formData, setFormData] = useState({
+      title: mergeGame(game)?.title || "",
+      genre: mergeGame(game)?.genre || "",
+      platform: mergeGame(game)?.platform || "",
+      rating: mergeGame(game)?.rating || 0,
+      cover: mergeGame(game)?.cover || "",
+      description: mergeGame(game)?.description || "",
+    });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -55,10 +66,7 @@ export const EditPage = () => {
       }
     }
     try {
-      await updateGame({
-        id: id!,
-        game: formData,
-      }).unwrap();
+      localStorage.setItem(`${id}`, JSON.stringify(formData))
       navigate(-1)
     } catch (error) {
       setError("Ошибка при редактировании данных");
@@ -137,8 +145,7 @@ export const EditPage = () => {
         </div>
         <Button
           onClick={handleSubmit}
-          disabled={isUpdating}
-          btnText={isUpdating ? "Обновление..." : "Обновить информацию"}
+          btnText="Обновить информацию"
         />
         {error && <div className="h-8 px-2 flex items-center justify-center bg-red-500 text-white shadow rounded">{error}</div>}
       </form>
